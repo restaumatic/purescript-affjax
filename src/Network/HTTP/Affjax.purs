@@ -32,7 +32,7 @@ import Data.Function.Uncurried (Fn2, runFn2)
 import Data.HTTP.Method (Method(..), CustomMethod)
 import Data.HTTP.Method as Method
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, toNullable)
 import Data.Time.Duration (Milliseconds(..))
 import Effect.Aff (Aff, try, delay)
@@ -238,7 +238,7 @@ affjax rt req = do
     Request.Document x → unsafeToForeign x
     Request.String x → unsafeToForeign x
     Request.FormData x → unsafeToForeign x
-    Request.FormURLEncoded x → unsafeToForeign (FormURLEncoded.encode x)
+    Request.FormURLEncoded x → (unsafeToForeign :: String -> Foreign) (fromMaybe "" (FormURLEncoded.encode x))
     Request.Json x → unsafeToForeign (J.stringify x)
 
   headers :: Maybe Request.Request -> Array RequestHeader
