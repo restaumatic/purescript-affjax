@@ -12,38 +12,17 @@ exports._ajax = function () {
       var XHR = module.require("xhr2");
       return new XHR();
     };
-
-    platformSpecific.fixupUrl = function (url) {
-      var urllib = module.require("url");
-      var u = urllib.parse(url);
-      u.protocol = u.protocol || "http:";
-      u.hostname = u.hostname || "localhost";
-      return urllib.format(u);
-    };
-
-    platformSpecific.getResponse = function (xhr) {
-      return xhr.response;
-    };
   } else {
     // We are in the browser
     platformSpecific.newXHR = function () {
       return new XMLHttpRequest();
-    };
-
-    platformSpecific.fixupUrl = function (url) {
-      return url || "/";
-    };
-
-    platformSpecific.getResponse = function (xhr) {
-      return xhr.response;
     };
   }
 
   return function (mkHeader, options) {
     return function (errback, callback) {
       var xhr = platformSpecific.newXHR();
-      var fixedUrl = platformSpecific.fixupUrl(options.url);
-      xhr.open(options.method || "GET", fixedUrl, true, options.username, options.password);
+      xhr.open(options.method || "GET", options.url, true, options.username, options.password);
       if (options.headers) {
         try {
           for (var i = 0, header; (header = options.headers[i]) != null; i++) {
@@ -68,7 +47,7 @@ exports._ajax = function () {
               var i = header.indexOf(":");
               return mkHeader(header.substring(0, i))(header.substring(i + 2));
             }),
-          response: platformSpecific.getResponse(xhr)
+          response: xhr.response
         });
       };
       xhr.responseType = options.responseType;
